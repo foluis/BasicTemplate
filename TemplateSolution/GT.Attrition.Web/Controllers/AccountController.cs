@@ -108,10 +108,10 @@ namespace NA.Template.Web.Controllers
 
                 //return CreatedAtRoute(nameof(GetById), new { id = clientDivision.Id, name = clientDivision.Name }, clientDivision);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //_logger.LogError(ex.ToString()); 
-                return StatusCode(500, result.Errors);
+                return StatusCode(500);
             }
         }
 
