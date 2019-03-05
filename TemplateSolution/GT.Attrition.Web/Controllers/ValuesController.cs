@@ -8,13 +8,14 @@ namespace NA.Template.Web.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        [Authorize] //HTTP code 302 (Fail)
+        [Authorize(Policy = "UserCanCreateSecurity")]
         [HttpGet]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
-        
+
+        [Authorize(Policy = "UserCanCreateUserGeneral")]
         [HttpGet("[Action]")]
         public IEnumerable<string> Otro()
         {
@@ -35,18 +36,11 @@ namespace NA.Template.Web.Controllers
             return new string[] { "SinNada", "SinNada" };
         }
         
-        [Authorize(Policy = "UserCanReadSecurity")]
+        [Authorize(Policy = "ClaimTypesPrueba")]
         [HttpGet("[Action]")]
         public IEnumerable<string> ElevatedRightsAdministrator()
         {
             return new string[] { "ElevatedRights Administrator", "ElevatedRights Administrator" };
-        }
-        
-        [Authorize(Policy = "UserCanUpdateSecurity")]        
-        [HttpGet("[Action]")]
-        public IEnumerable<string> ElevatedRightsRead()
-        {
-            return new string[] { "ElevatedRights Administrator and PowerUser", "ElevatedRights Administrator and PowerUser" };
         }
 
         // POST api/values

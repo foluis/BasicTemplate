@@ -147,14 +147,16 @@ namespace NA.Template.Web.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var user = await _applicationUserRepository.GetUserByNormalizedUserName(normalizedEmail, cancellationToken);
+
+            return user;
+
             //using (var connection = new SqlConnection(_connectionString))
             //{
             //    await connection.OpenAsync(cancellationToken);
             //    return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
             //        WHERE [NormalizedEmail] = @{nameof(normalizedEmail)}", new { normalizedEmail });
             //}
-
-            return null;
         }
 
         public Task<string> GetNormalizedEmailAsync(ApplicationUser user, CancellationToken cancellationToken)

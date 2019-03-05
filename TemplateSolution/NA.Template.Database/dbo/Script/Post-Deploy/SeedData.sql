@@ -35,8 +35,7 @@ END
 IF NOT EXISTS(SELECT * FROM [dbo].[ApplicationRolePermission] WHERE [ApplicationRoleId] = 1 AND [PermissionId] = 1 )
 BEGIN
 	INSERT INTO [ApplicationRolePermission] ([ApplicationRoleId],[PermissionId])
-	VALUES (1,1),
-		(1,2);
+	VALUES (1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),(1,12);
 END
 
 --[ApplicationUser]
@@ -50,7 +49,7 @@ END
 
 --[Add role do user foluis@hotmail.com (Admin) ]
 IF (	
-	(SELECT COUNT(1) FROM [dbo].[ApplicationUser] WHERE NormalizedUserName = 'FOLUIS@HOTMAIL.COM') = 0
+	(SELECT COUNT(1) FROM [dbo].[ApplicationUser] WHERE NormalizedUserName = 'FOLUIS@HOTMAIL.COM') = 1
 	)
 BEGIN
 	INSERT INTO [ApplicationUserRole] ([UserId],[RoleId])

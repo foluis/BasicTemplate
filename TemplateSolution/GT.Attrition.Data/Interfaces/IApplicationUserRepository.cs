@@ -13,6 +13,8 @@ namespace NA.Template.DataAccess.Interfaces
 
         Task<ApplicationUser> GetUserByNormalizedUserName(string normalizedUserName, CancellationToken cancellationToken);
 
+        Task<ApplicationUser> GetUserByNormalizedEmail(string normalizedEmail, CancellationToken cancellationToken);
+
         Task<IEnumerable<string>> GetUserRoles(ApplicationUser applicationUser, CancellationToken cancellationToken);
     }
 }

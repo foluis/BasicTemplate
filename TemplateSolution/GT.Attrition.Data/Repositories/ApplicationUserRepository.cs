@@ -1,10 +1,8 @@
 ﻿using Dapper;
 using NA.Template.DataAccess.Interfaces;
 using NA.Template.Entities;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,16 +37,47 @@ namespace NA.Template.DataAccess.Repositories
 
         public async Task<ApplicationUser> GetUserByNormalizedUserName(string normalizedUserName, CancellationToken cancellationToken)
         {
+            var result = new ApplicationUser();
+
             using (var connection = _base.GetConnection2())
             {
                 //var parameters = new DynamicParameters();
                 //parameters.Add("@NormalizedUserName", normalizedUserName);
 
-                var result = await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
+                var user = await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
                     WHERE [NormalizedUserName] = @{nameof(normalizedUserName)}", new { normalizedUserName });
 
-                return result;
+                var permissions = await connection.QueryAsync<Permission>($@"SELECT p.Id,p.Name
+                    FROM[Permission] p
+                    INNER JOIN ApplicationRolePermission arp ON arp.PermissionId = p.Id
+                    INNER JOIN ApplicationUserRole aur ON aur.RoleId = arp.ApplicationRoleId
+                    INNER JOIN ApplicationUser au ON au.Id = aur.UserId
+                    WHERE au.NormalizedEmail  = @{nameof(normalizedUserName)}", new { normalizedUserName });
+
+                user.Permissions = permissions;
+                result = user;
             }
+
+            return result;
+        }
+
+        public async Task<ApplicationUser> GetUserByNormalizedEmail(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            var result = new ApplicationUser();
+
+            using (var connection = _base.GetConnection2())
+            {
+                var user = await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
+                    WHERE [NormalizedUserName] = @{nameof(normalizedEmail)}", new { normalizedEmail });
+
+                var permissions = await connection.QueryAsync<List<Permission>>($@"SELECT p.Id,p.Name
+                    FROM[Permission] p
+                    INNER JOIN ApplicationRolePermission arp ON arp.PermissionId = p.Id
+                    INNER JOIN ApplicationUserRole aur ON aur.RoleId = arp.ApplicationRoleId
+                    INNER JOIN ApplicationUser au ON au.Id = aur.UserId
+                    WHERE au.NormalizedEmail  = @{nameof(normalizedEmail)}", new { normalizedEmail });
+            }
+            return result;
         }
 
         public async Task<IEnumerable<string>> GetUserRoles(ApplicationUser user, CancellationToken cancellationToken)

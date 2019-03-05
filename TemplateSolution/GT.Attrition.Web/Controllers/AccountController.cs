@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NA.Template.Web.Controllers
 {
@@ -37,26 +38,29 @@ namespace NA.Template.Web.Controllers
                     var credvalue = header.ToString().Substring("basic".Length).Trim();
                     var userCredentials = Encoding.UTF8.GetString(Convert.FromBase64String(credvalue));
                     var userNameNpass = userCredentials.Split(':');
+                    
+                    var result = await _signInManager.PasswordSignInAsync(userNameNpass[0], userNameNpass[1],isPersistent: true, lockoutOnFailure: false);
 
-                    ////Escribir codigo para consultar usaurio y pws y poder comparar
-
-
-
-                    if (userNameNpass[0] == "foluis@hotmail.com" && userNameNpass[1] == "mocoloco")
+                    if (result.Succeeded)
                     {
-                        //database authorization
-                        var userClaim = new[]
+                        var user = await _userManager.FindByEmailAsync(userNameNpass[0]);
+
+                        if (user == null)
+                            return NotFound();
+
+                        var userClaim = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, "useId"),
-                            new Claim(ClaimTypes.Name, "Luis"),
-                            //new Claim(ClaimTypes.Role, "Administrator"),
-                            //new Claim("ClaimTypesPrueba", "RequireClaimPruebaValue"),
-                            new Claim("UserCanReadSecurity","UserCanReadSecurity"),
+                            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                            new Claim(ClaimTypes.Name, user.UserName)
                         };
+
+                        foreach (var permission in user.Permissions)
+                        {                            
+                            userClaim.Add(new Claim(permission.Name, permission.Name));
+                        }
 
                         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("at_least_16_characters"));//yourKey (at least 16 characters) -> from application json or some secure else where
                         var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
 
                         var token = new JwtSecurityToken(
                             issuer: "http://www.domainname.com", //server - // ToDo: test other domains, make requests from diferents domains
@@ -68,6 +72,10 @@ namespace NA.Template.Web.Controllers
 
                         string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
                         return Ok(tokenString);
+                    }
+                    else
+                    {
+                        return StatusCode(500, "Upgrade exception");
                     }
                 }
                 return BadRequest("Username or pws not authorized");
