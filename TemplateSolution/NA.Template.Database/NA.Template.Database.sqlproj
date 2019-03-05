@@ -62,13 +62,23 @@
     <Folder Include="dbo\Views" />
     <Folder Include="dbo\Programmability" />
     <Folder Include="dbo\Script" />
+    <Folder Include="dbo\Script\Post-Deploy" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\ApplicationUser.sql" />
     <Build Include="dbo\Tables\ApplicationRole.sql" />
     <Build Include="dbo\Tables\ApplicationUserRole.sql" />
+    <Build Include="dbo\Tables\Permission.sql" />
+    <Build Include="dbo\Tables\ApplicationRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NA.Template.Database.publish.xml" />
+    <None Include="dbo\Script\Post-Deploy\SeedData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="NA.Template.Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="dbo\Script\Post-Deploy\Script.PostDeployment.sql" />
   </ItemGroup>
 </Project>

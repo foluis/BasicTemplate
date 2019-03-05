@@ -14,17 +14,14 @@ namespace NA.Template.Web.Authorization
         static RecognizedAuthorization()
         {
             Modules = AsReadOnly(new[] {
-                     CommissionModule.Security, CommissionModule.Catalog,
-                     CommissionModule.Planning, CommissionModule.Budget,
-                     CommissionModule.Commission, CommissionModule.Report
+                     CommissionModule.Security,
+                     CommissionModule.UserGeneral,                     
+                     CommissionModule.Report
                 });
             Permissions = AsReadOnly(new[] {
                     CommissionPermission.Create, CommissionPermission.Read,
-                    CommissionPermission.Update, CommissionPermission.Delete,
-                    CommissionPermission.AccessProtectedData, CommissionPermission.Approve,
-                    CommissionPermission.SetUpApprovals, CommissionPermission.Compute,
-                    CommissionPermission.Export
-                });
+                    CommissionPermission.Update, CommissionPermission.Delete
+            });
         }
 
         public static IEnumerable<UserCanConsumeResourceRequirement> GenerateRequirements()
