@@ -25,5 +25,7 @@ namespace NA.Template.Entities
         public bool PhoneNumberConfirmed { get; set; }
 
         public bool TwoFactorEnabled { get; set; }
+
+        public IEnumerable<Permission> Permissions { get; set; }
     }
 }
