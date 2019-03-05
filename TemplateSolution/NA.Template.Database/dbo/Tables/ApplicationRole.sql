@@ -8,3 +8,4 @@
 GO
  
 CREATE INDEX [IX_ApplicationRole_NormalizedName] ON [dbo].[ApplicationRole] ([NormalizedName])
+GO
