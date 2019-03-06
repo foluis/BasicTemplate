@@ -1,14 +1,15 @@
-﻿using NA.Template.Entities;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using NA.Template.Entities;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NA.Template.Web.Controllers
 {
@@ -18,13 +19,16 @@ namespace NA.Template.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger _logger;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [HttpPost("[Action]", Name = nameof(Token))]
@@ -38,15 +42,17 @@ namespace NA.Template.Web.Controllers
                     var credvalue = header.ToString().Substring("basic".Length).Trim();
                     var userCredentials = Encoding.UTF8.GetString(Convert.FromBase64String(credvalue));
                     var userNameNpass = userCredentials.Split(':');
-                    
-                    var result = await _signInManager.PasswordSignInAsync(userNameNpass[0], userNameNpass[1],isPersistent: true, lockoutOnFailure: false);
+
+                    var result = await _signInManager.PasswordSignInAsync(userNameNpass[0], userNameNpass[1], isPersistent: true, lockoutOnFailure: false);
 
                     if (result.Succeeded)
                     {
                         var user = await _userManager.FindByEmailAsync(userNameNpass[0]);
 
                         if (user == null)
+                        {
                             return NotFound();
+                        }
 
                         var userClaim = new List<Claim>
                         {
@@ -55,7 +61,7 @@ namespace NA.Template.Web.Controllers
                         };
 
                         foreach (var permission in user.Permissions)
-                        {                            
+                        {
                             userClaim.Add(new Claim(permission.Name, permission.Name));
                         }
 
@@ -82,7 +88,7 @@ namespace NA.Template.Web.Controllers
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex.ToString()); 
+                _logger.LogError(ex.ToString()); 
                 return StatusCode(500, ex.Message);
             }
         }
@@ -116,73 +122,11 @@ namespace NA.Template.Web.Controllers
 
                 //return CreatedAtRoute(nameof(GetById), new { id = clientDivision.Id, name = clientDivision.Name }, clientDivision);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //_logger.LogError(ex.ToString()); 
+                _logger.LogError(ex.ToString()); 
                 return StatusCode(500);
             }
         }
-
-        [Obsolete("Method1 is deprecated, please use Token instead.")]
-        [HttpPost("[Action]", Name = nameof(Login))]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
-        {
-            Microsoft.AspNetCore.Identity.SignInResult result = new Microsoft.AspNetCore.Identity.SignInResult();
-
-            try
-            {
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    //_logger.LogInformation("User logged in.");
-                    //return RedirectToLocal(returnUrl);
-                    return StatusCode(200, "Logged in");
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    //return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
-                    return StatusCode(200, "LoginWith2fa");
-                }
-                if (result.IsLockedOut)
-                {
-                    //_logger.LogWarning("User account locked out.");
-                    //return RedirectToAction(nameof(Lockout));
-                    return StatusCode(200, "User account locked out");
-                }
-                else
-                {
-                    //ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    //return View(model);
-                    return BadRequest("Invalid login attempt.");
-                }
-            }
-            catch (Exception ex)
-            {
-                //_logger.LogError(ex.ToString()); 
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [Obsolete("Method1 is deprecated, pending kill token.")]
-        [HttpPost("[Action]", Name = nameof(Logout))]
-        public async Task<IActionResult> Logout()
-        {
-            try
-            {
-                await _signInManager.SignOutAsync();
-                //_logger.LogInformation("User logged out.");
-                //return RedirectToAction(nameof(HomeController.Index), "Home");
-            }
-            catch (Exception ex)
-            {
-                //_logger.LogError(ex.ToString()); 
-                return StatusCode(500, ex.Message);
-            }
-
-            return Ok("User logged out.");
-        }
-
-
     }
 }
